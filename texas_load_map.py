@@ -36,11 +36,11 @@ GROUPS = {
     "Space cooling":     ["HVAC Cooling"],
     "Space heating":     ["HVAC Heating"],
     "Water heating":     ["Water Heating"],
-    "Wet appliances":    ["Clothes Washer", "Clothes Dryer", "Dishwasher"],
+    "Laundry & dishwasher":    ["Clothes Washer", "Clothes Dryer", "Dishwasher"],
     "Plug loads (MELs)": ["MELs"],
 }
 GROUP_ORDER = ["Space cooling", "Space heating", "Water heating",
-               "Wet appliances", "Plug loads (MELs)", "Other"]
+               "Laundry & dishwasher", "Plug loads (MELs)", "Other"]
 
 PERIOD_LABEL = {"annual": "Annual", "summer": "Summer (Jun–Sep)",
                 "winter": "Winter (Dec–Feb)", "uri": "Uri (Feb 14–18)"}
