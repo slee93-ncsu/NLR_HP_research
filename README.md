@@ -8,8 +8,8 @@
 
 | 파일 | 설명 |
 |---|---|
-| `index.html` | 인터랙티브 지도 (GitHub Pages로 게시되는 페이지) |
-| `Texas_load_breakdown.html` | `index.html`의 원본 (내용 동일) |
+| `index.html` | 인터랙티브 지도 (GitHub Pages로 게시되는 페이지, 연간(annual) 결과만) |
+| `Texas_load_breakdown.html` | 원본 지도 (연간·여름·겨울·Uri 4개 기간 모두 포함) |
 | `texas_load_map.ipynb` | 같은 지도를 로컬에서 그리는 주피터 노트북 |
 | `texas_load_map.py` | 노트북이 사용하는 지도·표 코드 |
 | `tx_counties.geojson` | 텍사스 카운티 경계 (254개, 단순화) |
