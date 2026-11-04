@@ -750,7 +750,7 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
     var r = W.resp[c];
     if(!r){ box.innerHTML = '<p class="empty">No weather data for ' + c + '.</p>'; return; }
 
-    var w = plotWidth(box), h = PLOT_H, L = 58, R = 16, Tp = 12, B = 40;
+    var w = plotWidth(box), h = PLOT_H, L = 47, R = 16, Tp = 12, B = 40;
     var svg = newPlot(w, h);
 
     var n = r.v[0].length;
@@ -799,13 +799,13 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
     for(var gy = 0; gy <= 4; gy++){
       var v = maxY * gy / 4;
       svg.appendChild(el("line", {x1:L, x2:w-R, y1:Y(v), y2:Y(v), class:"grid"}));
-      svg.appendChild(axisText(L - 8, Y(v) + 4, v.toFixed(1), "end"));
+      svg.appendChild(axisText(L - 6, Y(v) + 4, v.toFixed(1), "end"));
     }
     var tstep = (w - L - R) / ((thi - tlo) / 5) >= 38 ? 5 : 10;
     for(var t = Math.ceil(tlo/tstep)*tstep; t <= thi; t += tstep){
       svg.appendChild(axisText(X(t), h - B + 18, t + "°"));
     }
-    yCaption(svg, 14, (Tp + h - B) / 2, "Average load (kW/building)");
+    yCaption(svg, 12, (Tp + h - B) / 2, "Average load (kW/building)");
     svg.appendChild(axisText((L + w - R)/2, h - 8, "Outdoor temperature (°C)"));
 
     // zone band
@@ -860,7 +860,7 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
     var d = W.daily[c];
     if(!d){ box.innerHTML = '<p class="empty">No weather data for ' + c + '.</p>'; return; }
 
-    var w = plotWidth(box), h = PLOT_H, L = 58, R = 58, Tp = 12, B = 40;
+    var w = plotWidth(box), h = PLOT_H, L = 39, R = 45, Tp = 12, B = 24;   // no x-axis title here, only month letters
     var svg = newPlot(w, h);
     var n = d.t.length;
     var maxL = Math.max.apply(null, d.tot) * 1.08 || 1;
@@ -872,7 +872,7 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
     for(var gy = 0; gy <= 4; gy++){
       var v = maxL * gy / 4;
       svg.appendChild(el("line", {x1:L, x2:w-R, y1:Y(v), y2:Y(v), class:"grid"}));
-      svg.appendChild(axisText(L - 8, Y(v) + 4, Math.round(v), "end"));
+      svg.appendChild(axisText(L - 6, Y(v) + 4, Math.round(v), "end"));
     }
     // Uri, 14 to 18 February
     svg.appendChild(el("rect", {x:X(44), y:Tp, width:X(48)-X(44), height:h-B-Tp,
@@ -908,11 +908,11 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
     for(var i = 0; i < n; i++) tp.push(X(i) + "," + YT(d.t[i]));
     svg.appendChild(el("path", {d:"M" + tp.join("L"), class:"tline"}));
     for(var tv = Math.ceil(tlo/10)*10; tv <= thi; tv += 10){
-      svg.appendChild(el("text", {x:w - R + 8, y:YT(tv) + 4, "text-anchor":"start",
+      svg.appendChild(el("text", {x:w - R + 6, y:YT(tv) + 4, "text-anchor":"start",
                                   class:"ax t"}, tv + "°"));
     }
-    yCaption(svg, 14, (Tp + h - B) / 2, "Daily energy (kWh/building)");
-    yCaption(svg, w - 10, (Tp + h - B) / 2, "Temperature (°C)", true);
+    yCaption(svg, 12, (Tp + h - B) / 2, "Daily energy (kWh/building)");
+    yCaption(svg, w - 12, (Tp + h - B) / 2, "Temperature (°C)", true);
 
     box.innerHTML = "";
     box.appendChild(svg);
