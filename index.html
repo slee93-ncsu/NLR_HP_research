@@ -168,7 +168,7 @@ svg.map .cityg{pointer-events:none}
 .uses .e{color:var(--muted)}
 .empty{color:var(--muted); font-size:13px; padding:8px 0 2px}
 /* ---- weather panel ---- */
-.panel{margin-top:18px}
+.panel{margin-top:0}
 .plotbox{padding:10px 12px 4px; min-width:0}
 svg.plot{display:block; width:100%; height:auto; max-width:100%;
   overflow:visible; font-family:var(--f-mono)}
@@ -266,20 +266,20 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
         </div>
         <div class="det" id="det"></div>
       </section>
+      <section class="pane panel">
+        <div class="pane-h">
+          <h2>Weather response</h2>
+          <span class="note" id="panel-note"></span>
+          <div class="seg" id="seg-panel" role="group" aria-label="Weather plot">
+            <button type="button" data-v="response">Load vs temperature</button>
+            <button type="button" data-v="daily">Through the year</button>
+          </div>
+        </div>
+        <div class="plotbox" id="panel-plot"></div>
+      </section>
     </div>
   </div>
 
-  <section class="pane panel">
-    <div class="pane-h">
-      <h2>Weather response</h2>
-      <span class="note" id="panel-note"></span>
-      <div class="seg" id="seg-panel" role="group" aria-label="Weather plot">
-        <button type="button" data-v="response">Load vs temperature</button>
-        <button type="button" data-v="daily">Through the year</button>
-      </div>
-    </div>
-    <div class="plotbox" id="panel-plot"></div>
-  </section>
 
 </div>
 
