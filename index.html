@@ -21,6 +21,7 @@
   --line:#d3dae3; --line2:#e3e9ef; --accent:#0e5e6e; --accent-fg:#ffffff;
   --nodata:#e2e7ed; --hot:#b8492a;
   --r0:#2f5d7c; --r1:#3d918d; --r2:#67a95b; --r3:#c8a128; --r4:#bd5029;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s-rest:#aab4bf;
   --shadow:0 1px 2px rgba(18,28,38,.06), 0 8px 24px rgba(18,28,38,.05);
   --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
   --f-body:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
@@ -32,6 +33,7 @@
     --line:#2b3642; --line2:#222c37; --accent:#4fb3c4; --accent-fg:#06222a;
     --nodata:#222b35; --hot:#e07a4e;
     --r0:#4080ad; --r1:#49b3ae; --r2:#79cc72; --r3:#e5bf36; --r4:#e5733f;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s-rest:#4f5b68;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px rgba(0,0,0,.35);
     color-scheme:dark;
   }
@@ -41,6 +43,7 @@
   --line:#2b3642; --line2:#222c37; --accent:#4fb3c4; --accent-fg:#06222a;
   --nodata:#222b35; --hot:#e07a4e;
   --r0:#4080ad; --r1:#49b3ae; --r2:#79cc72; --r3:#e5bf36; --r4:#e5733f;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s-rest:#4f5b68;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px rgba(0,0,0,.35);
   color-scheme:dark;
 }
@@ -172,14 +175,19 @@ svg.plot{display:block; width:100%; height:auto; max-width:100%;
 svg.plot .grid{stroke:var(--line2); stroke-width:1}
 svg.plot .ax{fill:var(--muted); font-size:11px}
 svg.plot .cap{font-size:11.5px; font-family:var(--f-body)}
-svg.plot .ax.t{fill:var(--hot)}
-svg.plot .area{stroke:none; opacity:.92}
+svg.plot .ax.t{fill:var(--fg)}
+svg.plot .area{stroke:var(--panel); stroke-width:1.5; stroke-linejoin:round}
+svg.plot .area.flat{stroke:none}
 svg.plot .band{fill:var(--muted); opacity:.16; stroke:none}
-svg.plot .tline{fill:none; stroke:var(--hot); stroke-width:1.6}
+svg.plot .tline{fill:none; stroke:var(--fg); stroke-width:1.4}
 svg.plot .mark{stroke:var(--fg); stroke-width:1.2; stroke-dasharray:3 3}
 svg.plot .marklab{fill:var(--fg); font-size:11px; font-weight:600}
-svg.plot .uri{fill:var(--hot); opacity:.12}
+svg.plot .uri{fill:var(--muted); opacity:.16}
 svg.plot .dot{stroke:var(--panel); stroke-width:1}
+svg.plot .dlab{fill:var(--fg); font-family:var(--f-body); font-size:12px; font-weight:600;
+  paint-order:stroke; stroke:var(--panel); stroke-width:3px; stroke-linejoin:round}
+#panel-note{font-family:var(--f-display); font-size:16px; font-weight:600; color:var(--fg)}
+#panel-note .sub{font-family:var(--f-body); font-size:12px; font-weight:400; color:var(--muted)}
 svg.plot .dot.sel{stroke:var(--fg); stroke-width:2.2}
 .plegend{display:flex; flex-wrap:wrap; gap:8px 18px; padding:2px 16px 16px;
   font-size:11.5px; color:var(--muted)}
@@ -812,8 +820,24 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
       for(i = 0; i < n; i++) pts.push(X(temps[i]) + "," + Y(stack[i][g]));
       for(i = n - 1; i >= 0; i--) pts.push(X(temps[i]) + "," + Y(0));
       svg.appendChild(el("path", {d:"M" + pts.join("L") + "Z",
-                                  fill:color(g / (W.groups.length - 1)),
-                                  class:"area"}));
+                                  style:"fill:" + gcol(g), class:"area"}));
+    }
+    // direct labels inside the layers thick enough to hold one
+    for(g = 0; g < W.groups.length; g++){
+      // thickest point, measured over a label-wide window, away from the edges
+      var best = -1, bt2 = 0, half = 3;
+      for(i = half; i < n - half; i++){
+        var x = X(temps[i]);
+        if(x < L + 75 || x > w - R - 75) continue;
+        var th = Infinity;
+        for(var j = i - half; j <= i + half; j++)
+          th = Math.min(th, Y(g ? stack[j][g-1] : 0) - Y(stack[j][g]));
+        if(th > bt2){ bt2 = th; best = i; }
+      }
+      if(best < 0 || bt2 < 18) continue;
+      var ly = (Y(g ? stack[best][g-1] : 0) + Y(stack[best][g])) / 2 + 4;
+      svg.appendChild(el("text", {x:X(temps[best]), y:ly, "text-anchor":"middle",
+                                  class:"dlab"}, W.groups[g]));
     }
 
     // balance point: the bin with the least total load
@@ -828,7 +852,7 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
     box.innerHTML = "";
     box.appendChild(svg);
     legendFor(box, W.groups.map(function(g,i){
-      return [g, color(i / (W.groups.length - 1))]; })
+      return [g, gcol(i)]; })
       .concat([["10–90% of counties in view", "var(--line)"]]));
   }
 
@@ -863,9 +887,9 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
 
     // stacked: heating, cooling, everything else
     var parts = [
-      ["Space heating", color(1/5), function(i){ return d.ht[i]; }],
-      ["Space cooling", color(0),   function(i){ return d.cl[i]; }],
-      ["Everything else", color(4/5), function(i){ return d.tot[i]-d.ht[i]-d.cl[i]; }]
+      ["Space heating", gcol(1), function(i){ return d.ht[i]; }],
+      ["Space cooling", gcol(0), function(i){ return d.cl[i]; }],
+      ["Everything else", "var(--s-rest)", function(i){ return d.tot[i]-d.ht[i]-d.cl[i]; }]
     ];
     var base = new Array(n).fill(0);
     parts.forEach(function(p){
@@ -878,7 +902,7 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
       }
       dn.reverse();
       svg.appendChild(el("path", {d:"M" + up.join("L") + "L" + dn.join("L") + "Z",
-                                  fill:p[1], class:"area"}));
+                                  style:"fill:" + p[1], class:"area flat"}));
     });
 
     // temperature on the right axis
@@ -894,8 +918,11 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
     box.innerHTML = "";
     box.appendChild(svg);
     legendFor(box, parts.map(function(p){ return [p[0], p[1]]; })
-      .concat([["daily mean temperature (right axis)", "var(--hot)"]]));
+      .concat([["daily mean temperature (right axis)", "var(--fg)"]]));
   }
+
+  // one fixed, colorblind-checked color per end-use group (same order as W.groups)
+  function gcol(i){ return "var(--s" + (i + 1) + ")"; }
 
   function legendFor(box, items){
     var d = document.createElement("div");
@@ -911,8 +938,13 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
     if(!W) return;
     var box = document.getElementById("panel-plot");
     var c = panelCounty();
-    document.getElementById("panel-note").textContent =
-      c + " County" + (state.county ? "" : " (largest sample)");
+    var pn = document.getElementById("panel-note");
+    pn.textContent = c + " County";
+    if(!state.county){
+      var sub = document.createElement("span");
+      sub.className = "sub"; sub.textContent = " (largest sample — click a county)";
+      pn.appendChild(sub);
+    }
     Array.prototype.forEach.call(
       document.querySelectorAll("#seg-panel button"), function(b){
         b.setAttribute("aria-pressed", b.dataset.v === panelTab);
