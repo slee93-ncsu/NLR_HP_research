@@ -718,10 +718,10 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
     if(text !== undefined) n.textContent = text;
     return n;
   }
-  function yCaption(svg, h, s){
-    var t = el("text", {x:0, y:0, "text-anchor":"middle", class:"ax cap"}, s);
-    t.setAttribute("transform", "translate(14," + (h/2) + ") rotate(-90)");
-    svg.appendChild(t);
+  // axis title written horizontally above the axis, not rotated alongside it
+  function yCaption(svg, x, s, anchor, cls){
+    svg.appendChild(el("text", {x:x, y:12, "text-anchor":anchor || "start",
+                                class:"ax cap" + (cls ? " " + cls : "")}, s));
   }
   function axisText(x, y, s, anchor){
     return el("text", {x:x, y:y, "text-anchor":anchor || "middle",
@@ -749,7 +749,7 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
     var r = W.resp[c];
     if(!r){ box.innerHTML = '<p class="empty">No weather data for ' + c + '.</p>'; return; }
 
-    var w = plotWidth(box), h = PLOT_H, L = 58, R = 16, Tp = 12, B = 40;
+    var w = plotWidth(box), h = PLOT_H, L = 58, R = 16, Tp = 28, B = 40;
     var svg = newPlot(w, h);
 
     var n = r.v[0].length;
@@ -804,8 +804,8 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
     for(var t = Math.ceil(tlo/tstep)*tstep; t <= thi; t += tstep){
       svg.appendChild(axisText(X(t), h - B + 18, t + "°"));
     }
-    yCaption(svg, h - B, "kW per modeled building");
-    svg.appendChild(axisText((L + w - R)/2, h - 8, "outdoor temperature (°C)"));
+    yCaption(svg, 0, "Average load (kW/building)");
+    svg.appendChild(axisText((L + w - R)/2, h - 8, "Outdoor temperature (°C)"));
 
     // zone band
     if(bt.length > 2){
@@ -859,7 +859,7 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
     var d = W.daily[c];
     if(!d){ box.innerHTML = '<p class="empty">No weather data for ' + c + '.</p>'; return; }
 
-    var w = plotWidth(box), h = PLOT_H, L = 58, R = 44, Tp = 12, B = 40;
+    var w = plotWidth(box), h = PLOT_H, L = 58, R = 44, Tp = 28, B = 40;
     var svg = newPlot(w, h);
     var n = d.t.length;
     var maxL = Math.max.apply(null, d.tot) * 1.08 || 1;
@@ -910,12 +910,13 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
       svg.appendChild(el("text", {x:w - R + 8, y:YT(tv) + 4, "text-anchor":"start",
                                   class:"ax t"}, tv + "°"));
     }
-    yCaption(svg, h - B, "kWh per building per day");
+    yCaption(svg, 0, "Daily energy (kWh/building)");
+    yCaption(svg, w, "Temperature (°C)", "end", "t");
 
     box.innerHTML = "";
     box.appendChild(svg);
     legendFor(box, parts.map(function(p){ return [p[0], p[1]]; })
-      .concat([["daily mean temperature (right axis)", "var(--fg)"]]));
+      .concat([["Daily mean temperature", "var(--fg)"]]));
   }
 
   // one fixed, colorblind-checked color per end-use group (same order as W.groups)
