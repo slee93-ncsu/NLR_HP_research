@@ -1,6 +1,6 @@
 # Texas residential load breakdown
 
-텍사스 251개 카운티의 OCHRE 주거 부하를 용도별로 분해한 인터랙티브 지도와 집계 결과 (ResStock 2025, AMY 2021 기상)
+텍사스 252개 카운티의 OCHRE 주거 부하를 용도별로 분해한 인터랙티브 지도와 집계 결과 (ResStock 2025, AMY 2021 기상)
 
 **인터랙티브 지도:** https://slee93-ncsu.github.io/NLR_HP_research/
 

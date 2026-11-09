@@ -53,7 +53,6 @@ RAMP = LinearSegmentedColormap.from_list(
 NO_RESULT = {
     "Loving":    "no models sampled",
     "Glasscock": "2 models, both vacant",
-    "Val Verde": "62 occupied models, not simulated",
 }
 
 
@@ -163,7 +162,7 @@ class Breakdown:
                     edges.append("#ffffff")
                 elif name in NO_RESULT:
                     colors.append("#cfd6de")
-                    edges.append("#bd5029" if name == "Val Verde" else "#9aa6b4")
+                    edges.append("#9aa6b4")
                 else:
                     colors.append("#e6eaef")
                     edges.append("#d3dae3")
