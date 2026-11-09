@@ -95,6 +95,11 @@ button:focus-visible,select:focus-visible,[tabindex]:focus-visible,th button:foc
 .pane-h h2{font-family:var(--f-display); font-weight:600; font-size:14px; margin:0;
   letter-spacing:.005em}
 .pane-h .note{font-size:11.5px; color:var(--muted)}
+.dl{font:inherit; font-size:12px; font-weight:600; color:var(--fg); background:var(--panel);
+  border:1px solid var(--line); border-radius:8px; padding:5px 10px; cursor:pointer;
+  white-space:nowrap; line-height:1.2}
+.dl:hover{background:var(--panel2); border-color:var(--muted)}
+.dl:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
 
 /* ---- map ---- */
 .mapbox{position:relative; padding:10px 12px 4px}
@@ -267,6 +272,8 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
         <div class="pane-h">
           <h2>County summary</h2>
           <span class="note" id="det-note">Click a county on the map or a row below</span>
+          <button type="button" class="dl" id="dl-det"
+            title="Download this county's end-use breakdown as CSV">&#8595; CSV</button>
         </div>
         <div class="det" id="det"></div>
       </section>
@@ -278,6 +285,8 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
             <button type="button" data-v="response">Load vs temperature</button>
             <button type="button" data-v="daily">Through the year</button>
           </div>
+          <button type="button" class="dl" id="dl-panel"
+            title="Download the data behind this plot as CSV">&#8595; CSV</button>
         </div>
         <div class="plotbox" id="panel-plot"></div>
       </section>
@@ -720,6 +729,74 @@ footer code{font-family:var(--f-mono); font-size:11.5px}
             + sub + "</li>";
         }).join("") + "</ul>";
   }
+  /* ---------- CSV downloads ---------- */
+  function csvCell(v){
+    if(typeof v === "number") return String(v);
+    v = String(v == null ? "" : v);
+    return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  }
+  function downloadCSV(name, header, rows){
+    var text = "\ufeff" + [header].concat(rows).map(function(r){
+      return r.map(csvCell).join(",");
+    }).join("\r\n") + "\r\n";
+    var url = URL.createObjectURL(new Blob([text], {type:"text/csv;charset=utf-8"}));
+    var a = document.createElement("a");
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  }
+  function fileStem(c){ return c.replace(/[^A-Za-z0-9]+/g, "_"); }
+  function shownCounty(){
+    return state.county ||
+      counties.slice().sort(function(a,b){ return T.meta[b].nb - T.meta[a].nb; })[0];
+  }
+
+  // the county summary: one row per end use, with its group
+  document.getElementById("dl-det").addEventListener("click", function(){
+    var c = shownCounty(), r = rec(c); if(!r) return;
+    var nb = T.meta[c].nb;
+    var rows = [];
+    GROUP_NAMES.forEach(function(g){
+      MEMBERS[g].forEach(function(u){
+        var x = r.u[u]; if(!x) return;
+        rows.push([c, T.meta[c].z, nb, state.period, g, u,
+                   x[0], x[1], +(x[0]/nb).toFixed(1), x[2], x[3], r.pk, r.pt]);
+      });
+    });
+    downloadCSV(fileStem(c) + "_end_uses_" + state.period + ".csv",
+      ["county","zone","n_models","period","group","end_use",
+       "energy_kWh","energy_share","kWh_per_building",
+       "peak_enduse_kW","peak_share","county_peak_kW","county_peak_time"], rows);
+  });
+
+  // the weather plot currently shown
+  document.getElementById("dl-panel").addEventListener("click", function(){
+    if(!W) return;
+    var c = shownCounty(), rows = [];
+    if(panelTab === "response"){
+      var r = W.resp[c]; if(!r) return;
+      for(var i = 0; i < r.v[0].length; i++){
+        var row = [c, r.t0 + i, r.h[i]], s = 0;
+        for(var g = 0; g < W.groups.length; g++){ row.push(r.v[g][i]); s += r.v[g][i]; }
+        row.push(+s.toFixed(3));
+        rows.push(row);
+      }
+      downloadCSV(fileStem(c) + "_load_vs_temperature.csv",
+        ["county","temp_C","hours"].concat(W.groups.map(function(g){
+          return g + " (kW/building)"; }), ["Total (kW/building)"]), rows);
+    }else{
+      var d = W.daily[c]; if(!d) return;
+      for(var j = 0; j < d.t.length; j++){
+        rows.push([c, W.dates[j], d.t[j], d.tot[j], d.ht[j], d.cl[j],
+                   d.tot[j] - d.ht[j] - d.cl[j]]);
+      }
+      downloadCSV(fileStem(c) + "_daily_2021.csv",
+        ["county","date","mean_temp_C","total_kWh_per_building",
+         "heating_kWh_per_building","cooling_kWh_per_building",
+         "everything_else_kWh_per_building"], rows);
+    }
+  });
+
   function kv(k,v){
     return "<div><span class=\"k\">" + k + "</span><span class=\"v\">" + v + "</span></div>";
   }
